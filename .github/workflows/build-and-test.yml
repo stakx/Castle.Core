@@ -41,7 +41,9 @@ jobs:
         uses: actions/setup-dotnet@v1
         with:
           dotnet-version: 5.0.x
-      - name: Install dependencies
+      - name: Clean
+        run: dotnet clean ./Castle.Core.sln --configuration Release && dotnet nuget locals all --clear
+      - name: Install dependencies"
         run: dotnet restore
       - name: Build
         run: dotnet build -c Release --no-restore
