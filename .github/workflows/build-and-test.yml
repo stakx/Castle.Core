@@ -32,6 +32,9 @@ jobs:
   build-and-test-on-windows:
     runs-on: windows-latest
     steps:
+      - name: Find PEVerify
+        run: dir /s peverify.exe
+        working-directory: "C:\\Program Files (x86)\\Microsoft SDKs"
       - uses: actions/checkout@v2
       - name: Setup .NET Core 3.1 for running tests
         uses: actions/setup-dotnet@v1
