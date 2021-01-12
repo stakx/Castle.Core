@@ -33,7 +33,7 @@ jobs:
     runs-on: windows-latest
     steps:
       - name: Find PEVerify
-        run: dir /s peverify.exe
+        run: Get-ChildItem -Recurse peverify.exe
         working-directory: "C:\\Program Files (x86)\\Microsoft SDKs"
       - uses: actions/checkout@v2
       - name: Setup .NET Core 3.1 for running tests
