@@ -49,6 +49,7 @@ namespace Castle.DynamicProxy.Tests
 				var file = Path.Combine(path, "peverify.exe");
 				if (File.Exists(file))
 				{
+					Console.WriteLine("Going to use {0}.", file);
 					return file;
 				}
 			}
