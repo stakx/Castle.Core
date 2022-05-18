@@ -89,7 +89,7 @@ namespace Castle.DynamicProxy
 		                                        ProxyGenerationOptions options);
 
 		/// <summary>
-		///   Creates a proxy type for given <paramref name = "interfaceToProxy" /> and <parmaref
+		///   Creates a proxy type for given <paramref name = "interfaceToProxy" /> and <paramref
 		///    name = "additionalInterfacesToProxy" /> that delegates all calls to the provided interceptors and allows interceptors to switch the actual target of invocation.
 		/// </summary>
 		/// <param name = "interfaceToProxy">The interface type to proxy.</param>
