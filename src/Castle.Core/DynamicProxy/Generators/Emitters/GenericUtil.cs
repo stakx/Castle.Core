@@ -72,7 +72,7 @@ namespace Castle.DynamicProxy.Generators.Emitters
 					Trace.Assert(constraint.DeclaringType.IsGenericTypeDefinition);
 					Trace.Assert(methodToCopyGenericsFrom.DeclaringType.IsGenericType
 					             && constraint.DeclaringType == methodToCopyGenericsFrom.DeclaringType.GetGenericTypeDefinition(),
-					             "When a generic method parameter has a constraint on a generic type parameter, the generic type must be the declaring typer of the method.");
+					             "When a generic method parameter has a constraint on a generic type parameter, the generic type must be the declaring type of the method.");
 
 					var index = Array.IndexOf(constraint.DeclaringType.GetGenericArguments(), constraint);
 					Trace.Assert(index != -1, "The generic parameter comes from the given type.");
