@@ -26,13 +26,19 @@ namespace Castle.DynamicProxy.Tests
 	public class DefaultInterfaceMethodsTestCase : BasePEVerifyTestCase
 	{
 		[Test]
-		public void Can_proxy_type_having_method_with_default_implementation()
+		public void Can_proxy__type_having_method_with_default_implementation__in_interface_proxy()
 		{
 			_ = generator.CreateInterfaceProxyWithoutTarget<IHaveMethodWithDefaultImplementation>();
 		}
 
 		[Test]
-		public void Can_intercept_method_with_default_implementation()
+		public void Can_proxy__type_having_method_with_default_implementation__in_class_proxy()
+		{
+			_ = generator.CreateClassProxy<ImplementsIHaveMethodWithDefaultImplementationWithoutOverride>();
+		}
+
+		[Test]
+		public void Can_intercept__method_with_default_implementation__in_interface_proxy()
 		{
 			var expectedReturnValue = MethodBase.GetCurrentMethod();
 
@@ -45,7 +51,20 @@ namespace Castle.DynamicProxy.Tests
 		}
 
 		[Test]
-		public void Default_implementation_gets_called_when_method_not_intercepted()
+		public void Can_intercept__method_with_default_implementation__in_class_proxy()
+		{
+			var expectedReturnValue = MethodBase.GetCurrentMethod();
+
+			var interceptor = new SetReturnValueInterceptor(expectedReturnValue);
+			var proxy = (IHaveMethodWithDefaultImplementation)generator.CreateClassProxy<ImplementsIHaveMethodWithDefaultImplementationWithoutOverride>(interceptor);
+
+			var actualReturnValue = proxy.MethodWithDefaultImplementation();
+
+			Assert.AreEqual(expectedReturnValue, actualReturnValue);
+		}
+
+		[Test]
+		public void Default_implementation_gets_called__when_method_not_intercepted__in_interface_proxy()
 		{
 			var expectedReturnValue = typeof(IHaveMethodWithDefaultImplementation)
 			                          .GetMethod(nameof(IHaveMethodWithDefaultImplementation.MethodWithDefaultImplementation));
@@ -58,12 +77,30 @@ namespace Castle.DynamicProxy.Tests
 			Assert.AreEqual(expectedReturnValue, actualReturnValue);
 		}
 
+		[Test]
+		public void Default_implementation_gets_called__when_method_not_intercepted__in_class_proxy()
+		{
+			var expectedReturnValue = typeof(IHaveMethodWithDefaultImplementation)
+			                          .GetMethod(nameof(IHaveMethodWithDefaultImplementation.MethodWithDefaultImplementation));
+
+			var options = new ProxyGenerationOptions { Hook = new ProxyNothingHook() };
+			var proxy = (IHaveMethodWithDefaultImplementation)generator.CreateClassProxy<ImplementsIHaveMethodWithDefaultImplementationWithoutOverride>(options);
+
+			var actualReturnValue = proxy.MethodWithDefaultImplementation();
+
+			Assert.AreEqual(expectedReturnValue, actualReturnValue);
+		}
+
 		public interface IHaveMethodWithDefaultImplementation
 		{
 			MethodBase MethodWithDefaultImplementation()
 			{
 				return MethodBase.GetCurrentMethod();
 			}
+		}
+
+		public class ImplementsIHaveMethodWithDefaultImplementationWithoutOverride : IHaveMethodWithDefaultImplementation
+		{
 		}
 	}
 }
