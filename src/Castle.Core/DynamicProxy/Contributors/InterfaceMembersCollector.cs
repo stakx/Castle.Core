@@ -34,6 +34,11 @@ namespace Castle.DynamicProxy.Contributors
 			}
 
 			var proxyable = AcceptMethod(method, false, hook);
+			if (!proxyable && !method.IsAbstract)
+			{
+				return null;
+			}
+
 			return new MetaMethod(method, method, isStandalone, proxyable, false);
 		}
 	}
