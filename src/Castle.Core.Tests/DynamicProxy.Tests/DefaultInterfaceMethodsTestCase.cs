@@ -16,11 +16,18 @@
 
 namespace Castle.DynamicProxy.Tests
 {
+	using System.Reflection;
+
+	using Castle.DynamicProxy.Tests.Interceptors;
+
 	using NUnit.Framework;
 
 	[TestFixture]
 	public class DefaultInterfaceMethodsTestCase : BasePEVerifyTestCase
 	{
+		private static readonly MethodInfo IHaveDefaultInterfaceMethod_Method =
+			typeof(IHaveDefaultInterfaceMethod).GetMethod(nameof(IHaveDefaultInterfaceMethod.Method));
+
 		[Test]
 		public void Can_create_class_proxy()
 		{
@@ -54,10 +61,69 @@ namespace Castle.DynamicProxy.Tests
 			_ = generator.CreateInterfaceProxyWithTargetInterface<IHaveDefaultInterfaceMethod>(target);
 		}
 
+		[Test]
+		public void Can_intercept_method_in_class_proxy()
+		{
+			var interceptor = new SetReturnValueInterceptor("intercepted");
+			var proxy = (IHaveDefaultInterfaceMethod)generator.CreateClassProxy<InheritsDefaultInterfaceMethod>(interceptor);
+
+			var returnValue = proxy.Method();
+
+			Assert.AreSame("intercepted", returnValue);
+		}
+
+		[Test]
+		public void Can_intercept_method_in_class_proxy_with_target()
+		{
+			var interceptor = new SetReturnValueInterceptor("intercepted");
+			var target = new InheritsDefaultInterfaceMethod();
+			var proxy = (IHaveDefaultInterfaceMethod)generator.CreateClassProxyWithTarget<InheritsDefaultInterfaceMethod>(target, interceptor);
+
+			var returnValue = proxy.Method();
+
+			Assert.AreSame("intercepted", returnValue);
+		}
+
+		[Test]
+		public void Can_intercept_method_in_interface_proxy_without_target()
+		{
+			var interceptor = new SetReturnValueInterceptor("intercepted");
+			var proxy = generator.CreateInterfaceProxyWithoutTarget<IHaveDefaultInterfaceMethod>(interceptor);
+
+			var returnValue = proxy.Method();
+
+			Assert.AreSame("intercepted", returnValue);
+		}
+
+		[Test]
+		public void Can_intercept_method_in_interface_proxy_with_target()
+		{
+			var interceptor = new SetReturnValueInterceptor("intercepted");
+			var target = new InheritsDefaultInterfaceMethod();
+			var proxy = generator.CreateInterfaceProxyWithTarget<IHaveDefaultInterfaceMethod>(target, interceptor);
+
+			var returnValue = proxy.Method();
+
+			Assert.AreSame("intercepted", returnValue);
+		}
+
+		[Test]
+		public void Can_intercept_method_in_interface_proxy_with_target_interface()
+		{
+			var interceptor = new SetReturnValueInterceptor("intercepted");
+			var target = new InheritsDefaultInterfaceMethod();
+			var proxy = generator.CreateInterfaceProxyWithTargetInterface<IHaveDefaultInterfaceMethod>(target, interceptor);
+
+			var returnValue = proxy.Method();
+
+			Assert.AreSame("intercepted", returnValue);
+		}
+
 		public interface IHaveDefaultInterfaceMethod
 		{
-			void Method()
+			string Method()
 			{
+				return "default implementation";
 			}
 		}
 
