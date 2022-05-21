@@ -119,6 +119,64 @@ namespace Castle.DynamicProxy.Tests
 			Assert.AreSame("intercepted", returnValue);
 		}
 
+		[Test]
+		public void Default_implementation_called_when_method_not_proxied_in_class_proxy()
+		{
+			var options = new ProxyGenerationOptions { Hook = new ProxyNothingHook() };
+			var proxy = (IHaveDefaultInterfaceMethod)generator.CreateClassProxy<InheritsDefaultInterfaceMethod>(options);
+
+			var returnValue = proxy.Method();
+
+			Assert.AreEqual("default implementation", returnValue);
+		}
+
+		[Test]
+		public void Default_implementation_called_when_method_not_proxied_in_class_proxy_with_target()
+		{
+			var options = new ProxyGenerationOptions { Hook = new ProxyNothingHook() };
+			var target = new InheritsDefaultInterfaceMethod();
+			var proxy = (IHaveDefaultInterfaceMethod)generator.CreateClassProxyWithTarget(target, options);
+
+			var returnValue = proxy.Method();
+
+			Assert.AreEqual("default implementation", returnValue);
+		}
+
+		[Test]
+		public void Default_implementation_called_when_method_not_proxied_in_interface_proxy_without_target()
+		{
+			var options = new ProxyGenerationOptions { Hook = new ProxyNothingHook() };
+			var proxy = generator.CreateInterfaceProxyWithoutTarget<IHaveDefaultInterfaceMethod>(options);
+
+			var returnValue = proxy.Method();
+
+			Assert.AreEqual("default implementation", returnValue);
+		}
+
+		[Test]
+		public void Default_implementation_called_when_method_not_proxied_in_interface_proxy_with_target()
+		{
+			var options = new ProxyGenerationOptions { Hook = new ProxyNothingHook() };
+			var target = new InheritsDefaultInterfaceMethod();
+			var proxy = generator.CreateInterfaceProxyWithTarget<IHaveDefaultInterfaceMethod>(target, options);
+
+			var returnValue = proxy.Method();
+
+			Assert.AreEqual("default implementation", returnValue);
+		}
+
+		[Test]
+		public void Default_implementation_called_when_method_not_proxied_in_interface_proxy_with_target_interface()
+		{
+			var options = new ProxyGenerationOptions { Hook = new ProxyNothingHook() };
+			var target = new InheritsDefaultInterfaceMethod();
+			var proxy = generator.CreateInterfaceProxyWithTargetInterface<IHaveDefaultInterfaceMethod>(target, options);
+
+			var returnValue = proxy.Method();
+
+			Assert.AreEqual("default implementation", returnValue);
+		}
+
 		public interface IHaveDefaultInterfaceMethod
 		{
 			string Method()
