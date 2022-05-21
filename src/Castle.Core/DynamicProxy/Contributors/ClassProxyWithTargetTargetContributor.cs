@@ -23,6 +23,7 @@ namespace Castle.DynamicProxy.Contributors
 	using Castle.DynamicProxy.Generators;
 	using Castle.DynamicProxy.Generators.Emitters;
 	using Castle.DynamicProxy.Generators.Emitters.SimpleAST;
+	using Castle.DynamicProxy.Internal;
 	using Castle.DynamicProxy.Tokens;
 
 	internal class ClassProxyWithTargetTargetContributor : CompositeTypeContributor
@@ -39,6 +40,11 @@ namespace Castle.DynamicProxy.Contributors
 		{
 			var targetItem = new WrappedClassMembersCollector(targetType) { Logger = Logger };
 			yield return targetItem;
+
+			foreach (var @interface in targetType.GetAllInterfaces())
+			{
+				yield return new InterfaceMembersWithDefaultImplementationCollector(@interface, targetType);
+			}
 
 			foreach (var @interface in interfaces)
 			{
