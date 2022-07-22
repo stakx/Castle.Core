@@ -43,7 +43,7 @@ namespace Castle.DynamicProxy.Contributors
 
 			foreach (var @interface in targetType.GetAllInterfaces())
 			{
-				yield return new InterfaceMembersWithDefaultImplementationCollector(@interface, targetType);
+				yield return new InterfaceMembersWithDefaultImplementationCollector(@interface, targetType, forProxyWithTarget: true);
 			}
 
 			foreach (var @interface in interfaces)

@@ -131,15 +131,15 @@ namespace Castle.DynamicProxy.Tests
 		}
 
 		[Test]
-		public void Default_implementation_called_when_method_not_proxied_in_class_proxy_with_target()
+		public void Target_implementation_called_when_method_not_proxied_in_class_proxy_with_target()
 		{
 			var options = new ProxyGenerationOptions { Hook = new ProxyNothingHook() };
-			var target = new InheritsDefaultInterfaceMethod();
+			var target = new ImplementsDefaultInterfaceMethod();
 			var proxy = (IHaveDefaultInterfaceMethod)generator.CreateClassProxyWithTarget(target, options);
 
 			var returnValue = proxy.Method();
 
-			Assert.AreEqual("default implementation", returnValue);
+			Assert.AreEqual("implementation", returnValue);
 		}
 
 		[Test]
@@ -154,27 +154,27 @@ namespace Castle.DynamicProxy.Tests
 		}
 
 		[Test]
-		public void Default_implementation_called_when_method_not_proxied_in_interface_proxy_with_target()
+		public void Target_implementation_called_when_method_not_proxied_in_interface_proxy_with_target()
 		{
 			var options = new ProxyGenerationOptions { Hook = new ProxyNothingHook() };
-			var target = new InheritsDefaultInterfaceMethod();
+			var target = new ImplementsDefaultInterfaceMethod();
 			var proxy = generator.CreateInterfaceProxyWithTarget<IHaveDefaultInterfaceMethod>(target, options);
 
 			var returnValue = proxy.Method();
 
-			Assert.AreEqual("default implementation", returnValue);
+			Assert.AreEqual("implementation", returnValue);
 		}
 
 		[Test]
-		public void Default_implementation_called_when_method_not_proxied_in_interface_proxy_with_target_interface()
+		public void Target_implementation_called_when_method_not_proxied_in_interface_proxy_with_target_interface()
 		{
 			var options = new ProxyGenerationOptions { Hook = new ProxyNothingHook() };
-			var target = new InheritsDefaultInterfaceMethod();
+			var target = new ImplementsDefaultInterfaceMethod();
 			var proxy = generator.CreateInterfaceProxyWithTargetInterface<IHaveDefaultInterfaceMethod>(target, options);
 
 			var returnValue = proxy.Method();
 
-			Assert.AreEqual("default implementation", returnValue);
+			Assert.AreEqual("implementation", returnValue);
 		}
 
 		public interface IHaveDefaultInterfaceMethod
@@ -187,6 +187,14 @@ namespace Castle.DynamicProxy.Tests
 
 		public class InheritsDefaultInterfaceMethod : IHaveDefaultInterfaceMethod
 		{
+		}
+
+		public class ImplementsDefaultInterfaceMethod : InheritsDefaultInterfaceMethod
+		{
+			public string Method()
+			{
+				return "target implementation";
+			}
 		}
 	}
 }

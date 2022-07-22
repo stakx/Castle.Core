@@ -23,8 +23,9 @@ namespace Castle.DynamicProxy.Contributors
 	internal sealed class InterfaceMembersWithDefaultImplementationCollector : MembersCollector
 	{
 		private readonly InterfaceMapping map;
+		private readonly bool forProxyWithTarget;
 
-		public InterfaceMembersWithDefaultImplementationCollector(Type @interface, Type classToProxy)
+		public InterfaceMembersWithDefaultImplementationCollector(Type @interface, Type classToProxy, bool forProxyWithTarget)
 			: base(@interface)
 		{
 			Debug.Assert(@interface != null);
@@ -36,6 +37,7 @@ namespace Castle.DynamicProxy.Contributors
 			Debug.Assert(@interface.IsAssignableFrom(classToProxy));
 
 			map = classToProxy.GetInterfaceMap(@interface);
+			this.forProxyWithTarget = forProxyWithTarget;
 		}
 
 		protected override MetaMethod GetMethodToGenerate(MethodInfo method, IProxyGenerationHook hook, bool standalone)
@@ -53,7 +55,7 @@ namespace Castle.DynamicProxy.Contributors
 			Debug.Assert(hasTarget);
 
 			var proxyable = AcceptMethod(method, onlyVirtuals: true, hook);
-			if (!proxyable)
+			if (!proxyable && !forProxyWithTarget)
 			{
 				return null;
 			}
