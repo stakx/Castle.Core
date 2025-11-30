@@ -152,7 +152,6 @@ namespace Castle.DynamicProxy.Generators
 
 		protected virtual void CreateFields(ClassEmitter emitter)
 		{
-			CreateOptionsField(emitter);
 			CreateSelectorField(emitter);
 			CreateInterceptorsField(emitter);
 		}
@@ -164,11 +163,6 @@ namespace Castle.DynamicProxy.Generators
 #if FEATURE_SERIALIZATION
 			emitter.DefineCustomAttributeFor<XmlIgnoreAttribute>(interceptorsField);
 #endif
-		}
-
-		protected FieldReference CreateOptionsField(ClassEmitter emitter)
-		{
-			return emitter.CreateStaticField("proxyGenerationOptions", typeof(ProxyGenerationOptions));
 		}
 
 		protected void CreateSelectorField(ClassEmitter emitter)
@@ -373,11 +367,6 @@ namespace Castle.DynamicProxy.Generators
 				                        interfaceName);
 				throw new DynamicProxyException(message);
 			}
-		}
-
-		protected void InitializeStaticFields(Type builtType)
-		{
-			builtType.SetStaticField("proxyGenerationOptions", BindingFlags.NonPublic, ProxyGenerationOptions);
 		}
 
 		private bool OverridesEqualsAndGetHashCode(Type type)

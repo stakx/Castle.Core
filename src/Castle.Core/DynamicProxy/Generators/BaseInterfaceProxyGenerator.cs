@@ -135,8 +135,6 @@ namespace Castle.DynamicProxy.Generators
 
 			// Crosses fingers and build type
 			var generatedType = emitter.BuildType();
-
-			InitializeStaticFields(generatedType);
 			return generatedType;
 		}
 
