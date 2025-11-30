@@ -19,7 +19,6 @@ namespace Castle.DynamicProxy.Generators
 
 	using Castle.DynamicProxy.Contributors;
 	using Castle.DynamicProxy.Generators.Emitters.SimpleAST;
-	using Castle.DynamicProxy.Serialization;
 
 	internal sealed class InterfaceProxyWithoutTargetGenerator : BaseInterfaceProxyGenerator
 	{
@@ -30,8 +29,6 @@ namespace Castle.DynamicProxy.Generators
 		}
 
 		protected override bool AllowChangeTarget => false;
-
-		protected override string GeneratorType => ProxyTypeConstants.InterfaceWithoutTarget;
 
 		protected override CompositeTypeContributor GetProxyTargetContributor(Type proxyTargetType, INamingScope namingScope)
 		{

@@ -20,7 +20,6 @@ namespace Castle.DynamicProxy.Generators
 	using System.Linq;
 	using System.Reflection;
 #if FEATURE_SERIALIZATION
-	using System.Runtime.Serialization;
 	using System.Xml.Serialization;
 #endif
 
@@ -108,14 +107,6 @@ namespace Castle.DynamicProxy.Generators
 				AddMappingNoCheck(@interface, implementer, mapping);
 			}
 		}
-
-#if FEATURE_SERIALIZATION
-		protected void AddMappingForISerializable(IDictionary<Type, ITypeContributor> typeImplementerMapping,
-		                                          ITypeContributor instance)
-		{
-			AddMapping(typeof(ISerializable), instance, typeImplementerMapping);
-		}
-#endif
 
 		/// <summary>
 		///   It is safe to add mapping (no mapping for the interface exists)

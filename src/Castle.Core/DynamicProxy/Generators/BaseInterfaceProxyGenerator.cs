@@ -45,8 +45,6 @@ namespace Castle.DynamicProxy.Generators
 
 		protected abstract bool AllowChangeTarget { get; }
 
-		protected abstract string GeneratorType { get; }
-
 		protected abstract CompositeTypeContributor GetProxyTargetContributor(Type proxyTargetType, INamingScope namingScope);
 
 		protected abstract ProxyTargetAccessorContributor GetProxyTargetAccessorContributor();
@@ -214,12 +212,6 @@ namespace Castle.DynamicProxy.Generators
 			}
 
 			// 4. plus special interfaces
-
-#if FEATURE_SERIALIZATION
-			var serializableContributor = new InterfaceProxySerializableContributor(targetType, GeneratorType, interfaces);
-			contributorsList.Add(serializableContributor);
-			AddMappingForISerializable(typeImplementerMapping, serializableContributor);
-#endif
 
 			var proxyTargetAccessorContributor = GetProxyTargetAccessorContributor();
 			contributorsList.Add(proxyTargetAccessorContributor);
