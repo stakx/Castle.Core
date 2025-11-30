@@ -2,6 +2,9 @@
 
 ## Next
 
+Breaking Changes:
+- Removed support for binary serialization of generated proxies by removing all special handling for `[Serializable]` and/or `ISerializable` proxied types. Modern .NET is actively migrating away from binary serialization; see the official [BinaryFormatter Obsoletion Strategy](https://github.com/dotnet/designs/blob/4c359d7233964925314850f188f36ed809474799/accepted/2020/better-obsoletion/binaryformatter-obsoletion.md). (@stakx, #701)
+
 Enhancements:
 - Now target frameworks are: .NET 8, .NET Framework 4.6.2, .NET Standard 2.0
 - Tests platforms now are: .NET Framework 4.6.2, .NET 8, .NET 9
@@ -10,6 +13,7 @@ Enhancements:
 Deprecations:
 - .NET Core 2.1, .NET Core 3.1, .NET 6, and mono tests
 - .NET Standard 2.1 tfm
+- The `ProxyObjectReference` type has been removed as part of the above-mentioned removal of binary serialization support in generated proxies.
 
 ## 5.2.1 (2025-03-09)
 
