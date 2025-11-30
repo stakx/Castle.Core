@@ -2833,19 +2833,4 @@ namespace Castle.DynamicProxy.Serialization
         public CacheMappingsAttribute(byte[] serializedCacheMappings) { }
         public byte[] SerializedCacheMappings { get; }
     }
-    [System.Serializable]
-    public class ProxyObjectReference : System.Runtime.Serialization.IDeserializationCallback, System.Runtime.Serialization.IObjectReference, System.Runtime.Serialization.ISerializable
-    {
-        protected ProxyObjectReference(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) { }
-        public static Castle.DynamicProxy.ModuleScope ModuleScope { get; }
-        public void GetObjectData(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) { }
-        public object GetRealObject(System.Runtime.Serialization.StreamingContext context) { }
-        protected void InvokeCallback(object target) { }
-        public void OnDeserialization(object sender) { }
-        public object RecreateClassProxy() { }
-        public object RecreateInterfaceProxy(string generatorType) { }
-        protected virtual object RecreateProxy() { }
-        public static void ResetScope() { }
-        public static void SetScope(Castle.DynamicProxy.ModuleScope scope) { }
-    }
 }
