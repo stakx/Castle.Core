@@ -16,6 +16,7 @@ namespace Castle.DynamicProxy.Generators
 {
 	using System;
 	using System.Collections.Generic;
+	using System.Linq.Expressions;
 	using System.Reflection;
 
 	using Castle.DynamicProxy.Contributors;
@@ -158,12 +159,14 @@ namespace Castle.DynamicProxy.Generators
 #if FEATURE_BYREFLIKE
 					if (paramType.IsByRefLikeSafe())
 					{
-						// The argument value in the invocation `Arguments` array is an `object`
-						// and cannot be converted back to its original by-ref-like type.
-						// We need to replace it with some other value.
-
-						// For now, we just substitute the by-ref-like type's default value:
-						args[i] = new DefaultValueExpression(paramType);
+						// By-ref-like arguments are stored in the `Arguments` array
+						// as `System.Reflection.Pointer`s. Here we need to convert those back:
+						args[i] = new DereferencePointerExpression(
+							new MethodInvocationExpression(
+								null,
+								PointerMethods.UnboxMethod,
+								new MethodInvocationExpression(SelfReference.Self, InvocationMethods.GetArgumentValue, new LiteralIntExpression(i))),
+							paramType.MakePointerType());
 					}
 					else
 #endif
