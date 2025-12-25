@@ -192,6 +192,8 @@ namespace Castle.DynamicProxy.Generators
 			}
 #endif
 
+			contributorsList.Add(new RecordCloningContributor(targetType));
+
 			var proxyTargetAccessorContributor = GetProxyTargetAccessorContributor();
 			contributorsList.Add(proxyTargetAccessorContributor);
 			try
