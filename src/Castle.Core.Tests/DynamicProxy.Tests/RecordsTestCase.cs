@@ -1,4 +1,4 @@
-﻿// Copyright 2004-2022 Castle Project - http://www.castleproject.org/
+﻿// Copyright 2004-2025 Castle Project - http://www.castleproject.org/
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,12 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using Castle.DynamicProxy.Tests.Records;
-
-using NUnit.Framework;
-
 namespace Castle.DynamicProxy.Tests
 {
+	using Castle.DynamicProxy.Tests.Records;
+
+	using NUnit.Framework;
+
 	[TestFixture]
 	public class RecordsTestCase : BasePEVerifyTestCase
 	{
@@ -44,5 +44,15 @@ namespace Castle.DynamicProxy.Tests
 		{
 			_ = generator.CreateClassProxy<DerivedFromEmptyGenericRecord>(new StandardInterceptor());
 		}
+
+		[Test]
+		public void Cloning_a_record_proxy_yields_another_proxy_of_the_same_type()
+		{
+			var proxy = generator.CreateClassProxy<EmptyRecord>();
+			var clonedProxy = proxy with { };
+			Assert.True(ProxyUtil.IsProxy(clonedProxy));
+			Assert.AreSame(proxy.GetType(), clonedProxy.GetType());
+		}
+
 	}
 }
