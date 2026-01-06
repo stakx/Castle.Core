@@ -29,27 +29,3 @@ GOTO build
 dotnet build ./tools/Explicit.NuGet.Versions/Explicit.NuGet.Versions.slnx
 dotnet build --configuration %Configuration% || exit /b 1
 .\tools\Explicit.NuGet.Versions\build\nev.exe ".\build" "castle."
-GOTO test
-
-:test
-
-echo --------------------
-echo Running NET462 Tests
-echo --------------------
-
-dotnet test src\Castle.Core.Tests           -f net462 -c %Configuration% --no-build -- NUnit.TestOutputXml="%CD%" NUnit.TestOutputXmlFileName="DesktopClrTestResults"          || exit /b 1
-dotnet test src\Castle.Core.Tests.WeakNamed -f net462 -c %Configuration% --no-build -- NUnit.TestOutputXml="%CD%" NUnit.TestOutputXmlFileName="DesktopClrWeakNamedTestResults" || exit /b 1
-
-echo ---------------------------
-echo Running NET8.0 Tests
-echo ---------------------------
-
-dotnet test src\Castle.Core.Tests           -f net8.0 -c %Configuration% --no-build -- NUnit.TestOutputXml="%CD%" NUnit.TestOutputXmlFileName="Net80TestResults"               || exit /b 1
-dotnet test src\Castle.Core.Tests.WeakNamed -f net8.0 -c %Configuration% --no-build -- NUnit.TestOutputXml="%CD%" NUnit.TestOutputXmlFileName="Net80WeakNamedTestResults"      || exit /b 1
-
-echo ---------------------------
-echo Running NET9.0 Tests
-echo ---------------------------
-
-dotnet test src\Castle.Core.Tests           -f net9.0 -c %Configuration% --no-build -- NUnit.TestOutputXml="%CD%" NUnit.TestOutputXmlFileName="Net90TestResults"               || exit /b 1
-dotnet test src\Castle.Core.Tests.WeakNamed -f net9.0 -c %Configuration% --no-build -- NUnit.TestOutputXml="%CD%" NUnit.TestOutputXmlFileName="Net90WeakNamedTestResults"      || exit /b 1

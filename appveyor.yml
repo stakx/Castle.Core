@@ -7,7 +7,7 @@ image:
 #  ALL BUILD JOBS
 # ----------------
 skip_tags: false
-test: off
+configuration: Release
 
 
 for:
@@ -28,10 +28,6 @@ for:
   build_script:
   - uname -a
   - ./build.sh
-
-  # upload test results
-  after_build:
-  - find "$APPVEYOR_BUILD_FOLDER" -type f -name '*TestResults.xml' -print0 | xargs -0 -I '{}' curl -F 'file=@{}' "https://ci.appveyor.com/api/testresults/nunit3/$APPVEYOR_JOB_ID"
 
   # deployment is handled exclusively by the Windows build job (below)
   deploy: off
@@ -59,17 +55,6 @@ for:
   # build and run tests
   build_script:
   - cmd: build.cmd
-
-  # upload test results
-  after_build:
-  - ps: |
-      $wc = New-Object System.Net.WebClient
-      $wc.UploadFile("https://ci.appveyor.com/api/testresults/nunit/$($env:APPVEYOR_JOB_ID)", (Resolve-Path "Net80TestResults.xml"))
-      $wc.UploadFile("https://ci.appveyor.com/api/testresults/nunit/$($env:APPVEYOR_JOB_ID)", (Resolve-Path "Net80WeakNamedTestResults.xml"))
-      $wc.UploadFile("https://ci.appveyor.com/api/testresults/nunit/$($env:APPVEYOR_JOB_ID)", (Resolve-Path "Net90TestResults.xml"))
-      $wc.UploadFile("https://ci.appveyor.com/api/testresults/nunit/$($env:APPVEYOR_JOB_ID)", (Resolve-Path "Net90WeakNamedTestResults.xml"))
-      $wc.UploadFile("https://ci.appveyor.com/api/testresults/nunit/$($env:APPVEYOR_JOB_ID)", (Resolve-Path "DesktopClrTestResults.xml"))
-      $wc.UploadFile("https://ci.appveyor.com/api/testresults/nunit/$($env:APPVEYOR_JOB_ID)", (Resolve-Path "DesktopClrWeakNamedTestResults.xml"))
 
   # push packages to NuGet on tag builds
   on_success:
