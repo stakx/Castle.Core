@@ -99,14 +99,11 @@ namespace Castle.DynamicProxy.Generators
 				proxiedMethodTokenExpression = proxiedMethodToken;
 			}
 
-			var argumentsArray = emitter.CodeBuilder.DeclareLocal(typeof(object[]));
-			emitter.CodeBuilder.AddStatement(
-				new AssignStatement(
-					argumentsArray,
-					new NewArrayExpression(emitter.Arguments.Length, typeof(object))));
-
-			emitter.CodeBuilder.AddStatement(
-				new ReferencesToObjectArrayStatement(emitter.Arguments, argumentsArray));
+			// Create the `object[]` array backing the `IInvocation.Arguments` property
+			// and copy the typed method arguments into it (boxing them as necessary):
+			var argumentsMarshaller = new InvocationArgumentsMarshaller(emitter, MethodToOverride.GetParameters());
+			argumentsMarshaller.CreateArgumentsArray(out var argumentsArray);
+			argumentsMarshaller.MarshalArgumentsInto(argumentsArray);
 
 			var methodInterceptors = SetMethodInterceptors(@class, namingScope, emitter, proxiedMethodTokenExpression);
 
@@ -137,7 +134,8 @@ namespace Castle.DynamicProxy.Generators
 				emitter.CodeBuilder.AddStatement(new FinallyStatement());
 			}
 
-			GeneratorUtil.CopyOutAndRefParameters(emitter.Arguments, argumentsArray, MethodToOverride, emitter);
+			// Copy back values from the `object[]` arguments array to mutable by-ref parameters:
+			argumentsMarshaller.MarshalArgumentsOutFrom(argumentsArray);
 
 			if (hasByRefArguments)
 			{

@@ -1,11 +1,11 @@
-// Copyright 2004-2026 Castle Project - http://www.castleproject.org/
-// 
+﻿// Copyright 2004-2026 Castle Project - http://www.castleproject.org/
+//
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
-// 
+//
 //     http://www.apache.org/licenses/LICENSE-2.0
-// 
+//
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -16,27 +16,52 @@ namespace Castle.DynamicProxy.Generators
 {
 	using System.Linq;
 	using System.Reflection;
+	using System.Reflection.Emit;
 	using System.Runtime.InteropServices;
 
 	using Castle.DynamicProxy.Generators.Emitters;
 	using Castle.DynamicProxy.Generators.Emitters.SimpleAST;
 	using Castle.DynamicProxy.Internal;
 
-	internal static class GeneratorUtil
+	internal class InvocationArgumentsMarshaller
 	{
-		public static void CopyOutAndRefParameters(ArgumentReference[] args, LocalReference argumentsArray,
-		                                           MethodInfo method, MethodEmitter emitter)
-		{
-			var parameters = method.GetParameters();
+		private readonly MethodEmitter method;
+		private readonly ParameterInfo[] parameters;
 
-			for (var i = 0; i < parameters.Length; i++)
+		public InvocationArgumentsMarshaller(MethodEmitter method, ParameterInfo[] parameters)
+		{
+			this.method = method;
+			this.parameters = parameters;
+		}
+
+		public void CreateArgumentsArray(out LocalReference argumentsArray)
+		{
+			argumentsArray = method.CodeBuilder.DeclareLocal(typeof(object[]));
+
+			method.CodeBuilder.AddStatement(
+				new AssignStatement(
+					argumentsArray,
+					new NewArrayExpression(method.Arguments.Length, typeof(object))));
+
+		}
+
+		public void MarshalArgumentsInto(LocalReference argumentsArray)
+		{
+			method.CodeBuilder.AddStatement(
+				new MarshalArgumentsIntoStatement(method.Arguments, argumentsArray));
+		}
+
+		public void MarshalArgumentsOutFrom(LocalReference argumentsArray)
+		{
+			var arguments = method.Arguments;
+			for (int i = 0, n = arguments.Length; i < n; ++i)
 			{
 				if (IsByRef(parameters[i]) && !IsReadOnly(parameters[i]))
 				{
-					Reference arg = new IndirectReference(args[i]);
+					Reference argument = new IndirectReference(arguments[i]);
 
 #if FEATURE_BYREFLIKE
-					if (arg.Type.IsByRefLikeSafe())
+					if (argument.Type.IsByRefLikeSafe())
 					{
 						// The argument value in the invocation `Arguments` array is an `object`
 						// and cannot be converted back to its original by-ref-like type.
@@ -45,7 +70,10 @@ namespace Castle.DynamicProxy.Generators
 						// For now, we just substitute the by-ref-like type's default value:
 						if (parameters[i].IsOut)
 						{
-							emitter.CodeBuilder.AddStatement(new AssignStatement(arg, new DefaultValueExpression(arg.Type)));
+							method.CodeBuilder.AddStatement(
+								new AssignStatement(
+									argument,
+									new DefaultValueExpression(argument.Type)));
 						}
 						else
 						{
@@ -58,11 +86,11 @@ namespace Castle.DynamicProxy.Generators
 					else
 #endif
 					{
-						emitter.CodeBuilder.AddStatement(
+						method.CodeBuilder.AddStatement(
 							new AssignStatement(
-								arg,
+								argument,
 								new ConvertExpression(
-									arg.Type,
+									argument.Type,
 									new ArrayElementReference(argumentsArray, i))));
 					}
 				}
@@ -125,6 +153,61 @@ namespace Castle.DynamicProxy.Generators
 				}
 
 				return false;
+			}
+		}
+
+
+		private sealed class MarshalArgumentsIntoStatement : IStatement
+		{
+			private readonly ArgumentReference[] arguments;
+			private readonly LocalReference argumentsArray;
+
+			public MarshalArgumentsIntoStatement(ArgumentReference[] arguments, LocalReference argumentsArray)
+			{
+				this.arguments = arguments;
+				this.argumentsArray = argumentsArray;
+			}
+
+			public void Emit(ILGenerator gen)
+			{
+				for (int i = 0, n = arguments.Length; i < n; ++i)
+				{
+					argumentsArray.Emit(gen);
+					gen.Emit(OpCodes.Ldc_I4, i);
+
+					Reference arg = arguments[i];
+					if (arg.Type.IsByRef)
+					{
+						arg = new IndirectReference(arg);
+					}
+
+#if FEATURE_BYREFLIKE
+					if (arg.Type.IsByRefLikeSafe())
+					{
+						// The by-ref-like argument value cannot be put into the `object[]` array,
+						// because it cannot be boxed. We need to replace it with some other value.
+
+						// For now, we just erase it by substituting `null`:
+						gen.Emit(OpCodes.Ldnull);
+						gen.Emit(OpCodes.Stelem_Ref);
+
+						continue;
+					}
+#endif
+
+					arg.Emit(gen);
+
+					if (arg.Type.IsValueType)
+					{
+						gen.Emit(OpCodes.Box, arg.Type);
+					}
+					else if (arg.Type.IsGenericParameter)
+					{
+						gen.Emit(OpCodes.Box, arg.Type);
+					}
+
+					gen.Emit(OpCodes.Stelem_Ref);
+				}
 			}
 		}
 	}
