@@ -99,11 +99,20 @@ namespace Castle.DynamicProxy.Generators
 				proxiedMethodTokenExpression = proxiedMethodToken;
 			}
 
+			var argumentsArray = emitter.CodeBuilder.DeclareLocal(typeof(object[]));
+			emitter.CodeBuilder.AddStatement(
+				new AssignStatement(
+					argumentsArray,
+					new NewArrayExpression(emitter.Arguments.Length, typeof(object))));
+
+			emitter.CodeBuilder.AddStatement(
+				new ReferencesToObjectArrayStatement(emitter.Arguments, argumentsArray));
+
 			var methodInterceptors = SetMethodInterceptors(@class, namingScope, emitter, proxiedMethodTokenExpression);
 
 			var hasByRefArguments = HasByRefArguments(emitter.Arguments);
 
-			var arguments = GetCtorArguments(@class, proxiedMethodTokenExpression, emitter.Arguments, methodInterceptors);
+			var arguments = GetCtorArguments(@class, proxiedMethodTokenExpression, argumentsArray, methodInterceptors);
 			var ctorArguments = ModifyArguments(@class, arguments);
 
 			var invocationLocal = emitter.CodeBuilder.DeclareLocal(invocationType);
@@ -128,7 +137,7 @@ namespace Castle.DynamicProxy.Generators
 				emitter.CodeBuilder.AddStatement(new FinallyStatement());
 			}
 
-			GeneratorUtil.CopyOutAndRefParameters(emitter.Arguments, invocationLocal, MethodToOverride, emitter);
+			GeneratorUtil.CopyOutAndRefParameters(emitter.Arguments, argumentsArray, MethodToOverride, emitter);
 
 			if (hasByRefArguments)
 			{
@@ -231,7 +240,7 @@ namespace Castle.DynamicProxy.Generators
 				                               genericParamsArrayLocal));
 		}
 
-		private IExpression[] GetCtorArguments(ClassEmitter @class, IExpression proxiedMethodTokenExpression, ArgumentReference[] arguments, IExpression methodInterceptors)
+		private IExpression[] GetCtorArguments(ClassEmitter @class, IExpression proxiedMethodTokenExpression, IExpression argumentsArray, IExpression methodInterceptors)
 		{
 			return new[]
 			{
@@ -239,7 +248,7 @@ namespace Castle.DynamicProxy.Generators
 				ThisExpression.Instance,
 				methodInterceptors ?? interceptors,
 				proxiedMethodTokenExpression,
-				new ReferencesToObjectArrayExpression(arguments)
+				argumentsArray,
 			};
 		}
 

@@ -22,26 +22,22 @@ namespace Castle.DynamicProxy.Generators.Emitters.SimpleAST
 
 	using Castle.DynamicProxy.Internal;
 
-	internal class ReferencesToObjectArrayExpression : IExpression
+	internal class ReferencesToObjectArrayStatement : IStatement
 	{
 		private readonly ArgumentReference[] args;
+		private readonly LocalReference argumentsArray;
 
-		public ReferencesToObjectArrayExpression(params ArgumentReference[] args)
+		public ReferencesToObjectArrayStatement(ArgumentReference[] args, LocalReference argumentsArray)
 		{
 			this.args = args;
+			this.argumentsArray = argumentsArray;
 		}
 
 		public void Emit(ILGenerator gen)
 		{
-			var local = gen.DeclareLocal(typeof(object?[]));
-
-			gen.Emit(OpCodes.Ldc_I4, args.Length);
-			gen.Emit(OpCodes.Newarr, typeof(object));
-			gen.Emit(OpCodes.Stloc, local);
-
 			for (var i = 0; i < args.Length; i++)
 			{
-				gen.Emit(OpCodes.Ldloc, local);
+				argumentsArray.Emit(gen);
 				gen.Emit(OpCodes.Ldc_I4, i);
 
 				Reference arg = args[i];
@@ -77,8 +73,6 @@ namespace Castle.DynamicProxy.Generators.Emitters.SimpleAST
 
 				gen.Emit(OpCodes.Stelem_Ref);
 			}
-
-			gen.Emit(OpCodes.Ldloc, local);
 		}
 	}
 }

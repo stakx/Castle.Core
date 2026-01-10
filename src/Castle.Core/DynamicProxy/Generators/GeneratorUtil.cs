@@ -21,33 +21,18 @@ namespace Castle.DynamicProxy.Generators
 	using Castle.DynamicProxy.Generators.Emitters;
 	using Castle.DynamicProxy.Generators.Emitters.SimpleAST;
 	using Castle.DynamicProxy.Internal;
-	using Castle.DynamicProxy.Tokens;
 
 	internal static class GeneratorUtil
 	{
-		public static void CopyOutAndRefParameters(ArgumentReference[] args, LocalReference invocation,
+		public static void CopyOutAndRefParameters(ArgumentReference[] args, LocalReference argumentsArray,
 		                                           MethodInfo method, MethodEmitter emitter)
 		{
 			var parameters = method.GetParameters();
-
-			// Create it only if there are byref writable arguments.
-			LocalReference arguments = null;
 
 			for (var i = 0; i < parameters.Length; i++)
 			{
 				if (IsByRef(parameters[i]) && !IsReadOnly(parameters[i]))
 				{
-					if (arguments == null)
-					{
-						arguments = emitter.CodeBuilder.DeclareLocal(typeof(object[]));
-						emitter.CodeBuilder.AddStatement(
-							new AssignStatement(
-								arguments,
-								new MethodInvocationExpression(
-									invocation,
-									InvocationMethods.GetArguments)));
-					}
-
 					Reference arg = new IndirectReference(args[i]);
 
 #if FEATURE_BYREFLIKE
@@ -78,7 +63,7 @@ namespace Castle.DynamicProxy.Generators
 								arg,
 								new ConvertExpression(
 									arg.Type,
-									new ArrayElementReference(arguments, i))));
+									new ArrayElementReference(argumentsArray, i))));
 					}
 				}
 			}
