@@ -25,7 +25,7 @@ namespace Castle.DynamicProxy.Generators
 
 	internal static class GeneratorUtil
 	{
-		public static void CopyOutAndRefParameters(Reference[] dereferencedArguments, LocalReference invocation,
+		public static void CopyOutAndRefParameters(ArgumentReference[] args, LocalReference invocation,
 		                                           MethodInfo method, MethodEmitter emitter)
 		{
 			var parameters = method.GetParameters();
@@ -48,9 +48,10 @@ namespace Castle.DynamicProxy.Generators
 									InvocationMethods.GetArguments)));
 					}
 
+					Reference arg = new IndirectReference(args[i]);
+
 #if FEATURE_BYREFLIKE
-					var dereferencedParameterType = parameters[i].ParameterType.GetElementType();
-					if (dereferencedParameterType.IsByRefLikeSafe())
+					if (arg.Type.IsByRefLikeSafe())
 					{
 						// The argument value in the invocation `Arguments` array is an `object`
 						// and cannot be converted back to its original by-ref-like type.
@@ -59,7 +60,7 @@ namespace Castle.DynamicProxy.Generators
 						// For now, we just substitute the by-ref-like type's default value:
 						if (parameters[i].IsOut)
 						{
-							emitter.CodeBuilder.AddStatement(new AssignStatement(dereferencedArguments[i], new DefaultValueExpression(dereferencedParameterType)));
+							emitter.CodeBuilder.AddStatement(new AssignStatement(arg, new DefaultValueExpression(arg.Type)));
 						}
 						else
 						{
@@ -74,9 +75,9 @@ namespace Castle.DynamicProxy.Generators
 					{
 						emitter.CodeBuilder.AddStatement(
 							new AssignStatement(
-								dereferencedArguments[i],
+								arg,
 								new ConvertExpression(
-									dereferencedArguments[i].Type,
+									arg.Type,
 									new ArrayElementReference(arguments, i))));
 					}
 				}

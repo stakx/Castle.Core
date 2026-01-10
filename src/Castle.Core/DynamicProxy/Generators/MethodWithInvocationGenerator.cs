@@ -1,4 +1,4 @@
-// Copyright 2004-2025 Castle Project - http://www.castleproject.org/
+// Copyright 2004-2026 Castle Project - http://www.castleproject.org/
 // 
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -101,10 +101,9 @@ namespace Castle.DynamicProxy.Generators
 
 			var methodInterceptors = SetMethodInterceptors(@class, namingScope, emitter, proxiedMethodTokenExpression);
 
-			var dereferencedArguments = IndirectReference.WrapIfByRef(emitter.Arguments);
 			var hasByRefArguments = HasByRefArguments(emitter.Arguments);
 
-			var arguments = GetCtorArguments(@class, proxiedMethodTokenExpression, dereferencedArguments, methodInterceptors);
+			var arguments = GetCtorArguments(@class, proxiedMethodTokenExpression, emitter.Arguments, methodInterceptors);
 			var ctorArguments = ModifyArguments(@class, arguments);
 
 			var invocationLocal = emitter.CodeBuilder.DeclareLocal(invocationType);
@@ -129,7 +128,7 @@ namespace Castle.DynamicProxy.Generators
 				emitter.CodeBuilder.AddStatement(new FinallyStatement());
 			}
 
-			GeneratorUtil.CopyOutAndRefParameters(dereferencedArguments, invocationLocal, MethodToOverride, emitter);
+			GeneratorUtil.CopyOutAndRefParameters(emitter.Arguments, invocationLocal, MethodToOverride, emitter);
 
 			if (hasByRefArguments)
 			{
@@ -232,7 +231,7 @@ namespace Castle.DynamicProxy.Generators
 				                               genericParamsArrayLocal));
 		}
 
-		private IExpression[] GetCtorArguments(ClassEmitter @class, IExpression proxiedMethodTokenExpression, Reference[] dereferencedArguments, IExpression methodInterceptors)
+		private IExpression[] GetCtorArguments(ClassEmitter @class, IExpression proxiedMethodTokenExpression, ArgumentReference[] arguments, IExpression methodInterceptors)
 		{
 			return new[]
 			{
@@ -240,7 +239,7 @@ namespace Castle.DynamicProxy.Generators
 				ThisExpression.Instance,
 				methodInterceptors ?? interceptors,
 				proxiedMethodTokenExpression,
-				new ReferencesToObjectArrayExpression(dereferencedArguments)
+				new ReferencesToObjectArrayExpression(arguments)
 			};
 		}
 

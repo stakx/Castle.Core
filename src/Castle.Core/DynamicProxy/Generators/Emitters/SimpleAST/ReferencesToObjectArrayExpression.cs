@@ -1,4 +1,4 @@
-// Copyright 2004-2025 Castle Project - http://www.castleproject.org/
+// Copyright 2004-2026 Castle Project - http://www.castleproject.org/
 // 
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -24,9 +24,9 @@ namespace Castle.DynamicProxy.Generators.Emitters.SimpleAST
 
 	internal class ReferencesToObjectArrayExpression : IExpression
 	{
-		private readonly Reference[] args;
+		private readonly ArgumentReference[] args;
 
-		public ReferencesToObjectArrayExpression(params Reference[] args)
+		public ReferencesToObjectArrayExpression(params ArgumentReference[] args)
 		{
 			this.args = args;
 		}
@@ -44,10 +44,14 @@ namespace Castle.DynamicProxy.Generators.Emitters.SimpleAST
 				gen.Emit(OpCodes.Ldloc, local);
 				gen.Emit(OpCodes.Ldc_I4, i);
 
-				var reference = args[i];
+				Reference arg = args[i];
+				if (arg.Type.IsByRef)
+				{
+					arg = new IndirectReference(arg);
+				}
 
 #if FEATURE_BYREFLIKE
-				if (reference.Type.IsByRefLikeSafe())
+				if (arg.Type.IsByRefLikeSafe())
 				{
 					// The by-ref-like argument value cannot be put into the `object[]` array,
 					// because it cannot be boxed. We need to replace it with some other value.
@@ -60,20 +64,15 @@ namespace Castle.DynamicProxy.Generators.Emitters.SimpleAST
 				}
 #endif
 
-				reference.Emit(gen);
+				arg.Emit(gen);
 
-				if (reference.Type.IsByRef)
+				if (arg.Type.IsValueType)
 				{
-					throw new NotSupportedException();
+					gen.Emit(OpCodes.Box, arg.Type);
 				}
-
-				if (reference.Type.IsValueType)
+				else if (arg.Type.IsGenericParameter)
 				{
-					gen.Emit(OpCodes.Box, reference.Type);
-				}
-				else if (reference.Type.IsGenericParameter)
-				{
-					gen.Emit(OpCodes.Box, reference.Type);
+					gen.Emit(OpCodes.Box, arg.Type);
 				}
 
 				gen.Emit(OpCodes.Stelem_Ref);
