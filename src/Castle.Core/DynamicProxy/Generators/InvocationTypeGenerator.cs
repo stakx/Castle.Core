@@ -287,7 +287,7 @@ namespace Castle.DynamicProxy.Generators
 
 					IExpression dereferencedArgument;
 
-					// Note that we don't need special logic for by-ref-like values / `ByRefLikeProxy` here,
+					// Note that we don't need special logic for by-ref-like values / `ByRefLikeReference` here,
 					// since `ConvertArgumentFromObjectExpression` knows how to deal with those.
 
 					dereferencedArgument = new ConvertArgumentFromObjectExpression(
@@ -322,7 +322,7 @@ namespace Castle.DynamicProxy.Generators
 #if FEATURE_BYREFLIKE
 					if (localCopy.Type.IsByRefLikeSafe())
 					{
-						// For by-ref-like values, a `ByRefLikeProxy` has previously been placed in `IInvocation.Arguments`.
+						// For by-ref-like values, a `ByRefLikeReference` has previously been placed in `IInvocation.Arguments`.
 						// We must not replace that proxy, but use it to update the referenced by-ref-like parameter:
 						method.CodeBuilder.AddStatement(
 							new AssignStatement(
@@ -332,7 +332,7 @@ namespace Castle.DynamicProxy.Generators
 											ThisExpression.Instance,
 											InvocationMethods.GetArgumentValue,
 											new LiteralIntExpression(i)),
-										ByRefLikeProxyMethods.GetPtr,
+										ByRefLikeReferenceMethods.GetPtr,
 										new TypeTokenExpression(localCopy.Type)),
 									localCopy.Type),
 								localCopy));
@@ -354,7 +354,7 @@ namespace Castle.DynamicProxy.Generators
 			{
 #if FEATURE_BYREFLIKE
 				// TODO: For by-ref-like return values, we will need to read `IInvocation.ReturnValue`
-				// and set the return value via pointer indirection (`ByRefLikeProxy.GetPtr`).
+				// and set the return value via pointer indirection (`ByRefLikeReference.GetPtr`).
 #endif
 
 				method.CodeBuilder.AddStatement(new MethodInvocationExpression(

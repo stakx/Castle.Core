@@ -24,7 +24,6 @@ namespace Castle.DynamicProxy.Generators
 	using System.Xml.Serialization;
 #endif
 
-	using Castle.Core.Internal;
 	using Castle.DynamicProxy.Contributors;
 	using Castle.DynamicProxy.Generators.Emitters;
 	using Castle.DynamicProxy.Generators.Emitters.SimpleAST;
@@ -107,7 +106,7 @@ namespace Castle.DynamicProxy.Generators
 
 			argumentsMarshaller.CopyIn(out var argumentsArray, out var hasByRefArguments, out var hasByRefLikeArguments);
 
-			// TODO: If the return type is by-ref-like, we should prepare a local variable and a `ByRefLikeProxy` for it
+			// TODO: If the return type is by-ref-like, we should prepare a local variable and a `ByRefLikeReference` for it
 			// and place it in `IInvocation.ReturnValue`, so that the interception pipeline has a means to return something.
 
 			var ctorArguments = GetCtorArguments(@class, proxiedMethodTokenExpression, argumentsArray, methodInterceptors);
@@ -273,13 +272,13 @@ namespace Castle.DynamicProxy.Generators
 						hasByRefLikeArguments = true;
 
 						// By-ref-like values live exclusively on the stack and cannot be boxed to `object`.
-						// Instead of them, we prepare instances of `ByRefLikeProxy` wrappers that reference them.
+						// Instead of them, we prepare instances of `ByRefLikeReference` wrappers that reference them.
 
 #if NET9_0_OR_GREATER
 						// TODO: perhaps we should cache these `ConstructorInfo`s?
-						ConstructorInfo proxyCtor = typeof(ByRefLikeProxy<>).MakeGenericType(dereferencedArgumentType).GetConstructors().Single();
+						ConstructorInfo referenceCtor = typeof(ByRefLikeReference<>).MakeGenericType(dereferencedArgumentType).GetConstructors().Single();
 #else
-						ConstructorInfo proxyCtor = ByRefLikeProxyMethods.Constructor;
+						ConstructorInfo referenceCtor = ByRefLikeReferenceMethods.Constructor;
 #endif
 						if (dereferencedArgumentType.IsConstructedGenericType)
 						{
@@ -287,21 +286,21 @@ namespace Castle.DynamicProxy.Generators
 							if (typeDef == typeof(ReadOnlySpan<>))
 							{
 								var typeArg = dereferencedArgumentType.GetGenericArguments()[0];
-								proxyCtor = typeof(ReadOnlySpanProxy<>).MakeGenericType(typeArg).GetConstructors().Single();
+								referenceCtor = typeof(ReadOnlySpanReference<>).MakeGenericType(typeArg).GetConstructors().Single();
 							}
 							else if (typeDef == typeof(Span<>))
 							{
 								var typeArg = dereferencedArgumentType.GetGenericArguments()[0];
-								proxyCtor = typeof(SpanProxy<>).MakeGenericType(typeArg).GetConstructors().Single();
+								referenceCtor = typeof(SpanReference<>).MakeGenericType(typeArg).GetConstructors().Single();
 							}
 						}
 
-						var proxy = method.CodeBuilder.DeclareLocal(typeof(ByRefLikeProxy));
+						var proxy = method.CodeBuilder.DeclareLocal(typeof(ByRefLikeReference));
 						method.CodeBuilder.AddStatement(
 							new AssignStatement(
 								proxy,
 								new NewInstanceExpression(
-									proxyCtor,
+									referenceCtor,
 									new TypeTokenExpression(dereferencedArgumentType),
 									new AddressOfExpression(dereferencedArgument))));
 
@@ -329,7 +328,7 @@ namespace Castle.DynamicProxy.Generators
 						var dereferencedArgument = new IndirectReference(arguments[i]);
 						var dereferencedArgumentType = dereferencedArgument.Type;
 
-						// Note that we don't need special logic for by-ref-like values / `ByRefLikeProxy` here,
+						// Note that we don't need special logic for by-ref-like values / `ByRefLikeReference` here,
 						// since `ConvertArgumentFromObjectExpression` knows how to deal with those.
 
 						method.CodeBuilder.AddStatement(
@@ -355,15 +354,15 @@ namespace Castle.DynamicProxy.Generators
 
 					if (dereferencedArgumentType.IsByRefLikeSafe())
 					{
-						// The `ByRefLikeProxy` invocation argument must be rendered unusable
+						// The `ByRefLikeReference` invocation argument must be rendered unusable
 						// at the end of the (intercepted) method invocation, since it references
 						// a method argument that is about to be popped off the stack.
 						method.CodeBuilder.AddStatement(
 							new MethodInvocationExpression(
 								new AsTypeExpression(
 									new ArrayElementReference(argumentsArray, i),
-									typeof(ByRefLikeProxy)),
-								ByRefLikeProxyMethods.Invalidate,
+									typeof(ByRefLikeReference)),
+								ByRefLikeReferenceMethods.Invalidate,
 								argumentType.IsByRef ? argument : new AddressOfExpression(argument)));
 
 						// Make the unusable proxy unreachable by erasing it from the invocation arguments array.
@@ -392,7 +391,7 @@ namespace Castle.DynamicProxy.Generators
 						returnValue,
 						new MethodInvocationExpression(invocation, InvocationMethods.GetReturnValue)));
 
-				// Note that we don't need special logic for by-ref-like values / `ByRefLikeProxy` here,
+				// Note that we don't need special logic for by-ref-like values / `ByRefLikeReference` here,
 				// since `ConvertArgumentFromObjectExpression` knows how to deal with those.
 
 				// Emit code to ensure a value type return type is not null, otherwise the cast will cause a null-deref

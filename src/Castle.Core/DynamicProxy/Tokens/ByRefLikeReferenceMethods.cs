@@ -21,15 +21,13 @@ namespace Castle.DynamicProxy.Tokens
 	using System.Linq;
 	using System.Reflection;
 
-	using Castle.DynamicProxy.Internal;
-
-	internal static class ByRefLikeProxyMethods
+	internal static class ByRefLikeReferenceMethods
 	{
-		public static ConstructorInfo Constructor = typeof(ByRefLikeProxy).GetConstructors().Single();
+		public static ConstructorInfo Constructor = typeof(ByRefLikeReference).GetConstructors().Single();
 
-		public static MethodInfo GetPtr = typeof(ByRefLikeProxy).GetMethod(nameof(ByRefLikeProxy.GetPtr))!;
+		public static MethodInfo GetPtr = typeof(ByRefLikeReference).GetMethod(nameof(ByRefLikeReference.GetPtr))!;
 
-		public static MethodInfo Invalidate = typeof(ByRefLikeProxy).GetMethod(nameof(ByRefLikeProxy.Invalidate))!;
+		public static MethodInfo Invalidate = typeof(ByRefLikeReference).GetMethod(nameof(ByRefLikeReference.Invalidate))!;
 	}
 }
 
