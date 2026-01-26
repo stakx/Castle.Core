@@ -38,8 +38,7 @@ namespace Castle.DynamicProxy
 	/// <typeparam name="TByRefLike">A by-ref-like (<c>ref struct</c>) type.</typeparam>
 	public interface IByRefLikeProxy<TByRefLike> where TByRefLike : struct, allows ref struct
 	{
-		TByRefLike Get();
-		void Set(in TByRefLike value);
+		ref TByRefLike Value { get; }
 	}
 #endif
 
@@ -59,8 +58,7 @@ namespace Castle.DynamicProxy
 	/// </remarks>
 	public interface IReadOnlySpanProxy<T>
 	{
-		ReadOnlySpan<T> Get();
-		void Set(in ReadOnlySpan<T> value);
+		ref ReadOnlySpan<T> Value { get; }
 	}
 
 	/// <summary>
@@ -79,8 +77,7 @@ namespace Castle.DynamicProxy
 	/// </remarks>
 	public interface ISpanProxy<T>
 	{
-		Span<T> Get();
-		void Set(in Span<T> value);
+		ref Span<T> Value { get; }
 	}
 }
 

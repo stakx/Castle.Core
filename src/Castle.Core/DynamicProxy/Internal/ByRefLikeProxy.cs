@@ -141,14 +141,12 @@ namespace Castle.DynamicProxy.Internal
 			}
 		}
 
-		public TByRefLike Get()
+		public ref TByRefLike Value
 		{
-			return *(TByRefLike*)GetPtrNocheck();
-		}
-
-		public void Set(in TByRefLike value)
-		{
-			*(TByRefLike*)GetPtrNocheck() = value;
+			get
+			{
+				return ref *(TByRefLike*)GetPtrNocheck();
+			}
 		}
 	}
 #endif
@@ -181,14 +179,12 @@ namespace Castle.DynamicProxy.Internal
 			}
 		}
 
-		public ReadOnlySpan<T> Get()
+		public ref ReadOnlySpan<T> Value
 		{
-			return *(ReadOnlySpan<T>*)GetPtrNocheck();
-		}
-
-		public void Set(in ReadOnlySpan<T> value)
-		{
-			*(ReadOnlySpan<T>*)GetPtrNocheck() = value;
+			get
+			{
+				return ref *(ReadOnlySpan<T>*)GetPtrNocheck();
+			}
 		}
 	}
 
@@ -220,14 +216,12 @@ namespace Castle.DynamicProxy.Internal
 			}
 		}
 
-		public Span<T> Get()
+		public ref Span<T> Value
 		{
-			return *(Span<T>*)GetPtrNocheck();
-		}
-
-		public void Set(in Span<T> value)
-		{
-			*(Span<T>*)GetPtrNocheck() = value;
+			get
+			{
+				return ref *(Span<T>*)GetPtrNocheck();
+			}
 		}
 	}
 }
