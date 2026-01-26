@@ -21,6 +21,7 @@ namespace Castle.DynamicProxy
 {
 	using System;
 	using System.ComponentModel;
+	using System.Diagnostics;
 	using System.Diagnostics.CodeAnalysis;
 	using System.Threading;
 
@@ -72,7 +73,10 @@ namespace Castle.DynamicProxy
 	[EditorBrowsable(EditorBrowsableState.Never)]
 	public unsafe class ByRefLikeReference
 	{
+		[DebuggerBrowsable(DebuggerBrowsableState.Never)]
 		private readonly Type type;
+
+		[DebuggerBrowsable(DebuggerBrowsableState.Never)]
 		private nint ptr;
 
 		/// <summary>
